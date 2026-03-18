@@ -1,0 +1,340 @@
+local Storage      = game:GetService("ReplicatedStorage");
+local InputService = game:GetService("UserInputService");
+local TweenService = game:GetService("TweenService");
+local CoreGui      = game:GetService("CoreGui");
+local Players      = game:GetService("Players");
+
+local Player = Players.LocalPlayer
+
+local ToolGenerate = Storage:WaitForChild("event_generation")
+local ToolGenerateDone = Storage:WaitForChild("event_done_generation")
+
+local isGenerating = false
+local isUIVisible = true
+
+local DragSettings = {
+        Speed = 0.05,
+        Toggle = false,
+        Start = nil,
+        InitialPosition = nil
+    }
+
+if CoreGui:FindFirstChild("CustomToolSpoofer") then
+    CoreGui:FindFirstChild("CustomToolSpoofer"):Destroy()
+end
+
+local function UpdateDrag(input, frame)
+    local CBaseX = DragSettings.InitialPosition.X.Scale * frame.Parent.AbsoluteSize.X + DragSettings.InitialPosition.X.Offset
+    local CBaseY = DragSettings.InitialPosition.Y.Scale * frame.Parent.AbsoluteSize.Y + DragSettings.InitialPosition.Y.Offset
+
+    local UpdateCenterX = CBaseX + (input.Position.X - DragSettings.Start.X)
+    local UpdateCenterY = CBaseY + (input.Position.Y - DragSettings.Start.Y)
+
+    UpdateCenterX = math.clamp(UpdateCenterX, frame.AbsoluteSize.X / 2, frame.Parent.AbsoluteSize.X - frame.AbsoluteSize.X / 2)
+    UpdateCenterY = math.clamp(UpdateCenterY, frame.AbsoluteSize.Y / 2 - 60, frame.Parent.AbsoluteSize.Y - frame.AbsoluteSize.Y / 2)
+
+    TweenService:Create(frame, TweenInfo.new(DragSettings.Speed), {Position = UDim2.new(0, UpdateCenterX, 0, UpdateCenterY)}):Play()
+end
+
+local CustomToolSpoofer = Instance.new("ScreenGui")
+local Main = Instance.new("Frame")
+local MainCorner = Instance.new("UICorner")
+local MainStroke = Instance.new("UIStroke")
+local MainGradient = Instance.new("UIGradient")
+local Title = Instance.new("TextLabel")
+local InputBox = Instance.new("TextBox")
+local InputCorner = Instance.new("UICorner")
+local InputBoxX = Instance.new("TextBox")
+local InputCorner2 = Instance.new("UICorner")
+local InputBoxY = Instance.new("TextBox")
+local InputCorner3 = Instance.new("UICorner")
+local InputBoxZ = Instance.new("TextBox")
+local InputCorner4 = Instance.new("UICorner")
+local SubmitGeneration = Instance.new("TextButton")
+
+CustomToolSpoofer.Name = "CustomToolSpoofer"
+CustomToolSpoofer.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+CustomToolSpoofer.Parent = CoreGui
+
+Main.Name = "Main"
+Main.Position = UDim2.new(0.5, 0, 0.5, 0)
+Main.Size = UDim2.new(0, 325, 0, 250)
+Main.BackgroundColor3 = Color3.fromRGB(255, 100, 255)
+Main.BackgroundTransparency = 0.5
+Main.BorderSizePixel = 0
+Main.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Main.AnchorPoint = Vector2.new(0.5, 0.5)
+Main.Parent = CustomToolSpoofer
+
+MainCorner.Name = "MainCorner"
+MainCorner.CornerRadius = UDim.new(0.07, 0)
+MainCorner.Parent = Main
+
+MainStroke.Name = "MainStroke"
+MainStroke.Color = Color3.fromRGB(255, 0, 255)
+MainStroke.Thickness = 8
+MainStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+MainStroke.Parent = Main
+
+MainGradient.Name = "MainGradient"
+MainGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)), ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 100, 255))})
+MainGradient.Parent = MainStroke
+
+Title.Name = "Title"
+Title.Size = UDim2.new(0, 325, 0, 40)
+Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundTransparency = 1
+Title.TextStrokeTransparency = 0
+Title.BorderSizePixel = 0
+Title.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Title.Text = "Tool Size Spoofer\nMax Size: 2048"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 14
+Title.Font = "FredokaOne"
+Title.TextScaled = true
+Title.TextWrapped = true
+Title.Parent = Main
+
+InputBox.Name = "InputBox"
+InputBox.Position = UDim2.new(0.221538, 0, 0.196, 0)
+InputBox.PlaceholderColor3 = Color3.fromRGB(255, 255, 255)
+InputBox.Size = UDim2.new(0, 180, 0, 50)
+InputBox.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+InputBox.BorderSizePixel = 0
+InputBox.TextStrokeTransparency = 0
+InputBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
+InputBox.Text = ""
+InputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+InputBox.TextSize = 24
+InputBox.Font = "Cartoon"
+InputBox.TextWrapped = true
+InputBox.PlaceholderText = "Input Generation"
+InputBox.Parent = Main
+
+InputCorner.Name = "InputCorner"
+InputCorner.CornerRadius = UDim.new(0.1, 0)
+InputCorner.Parent = InputBox
+
+InputBoxX.Name = "InputBoxX"
+InputBoxX.Position = UDim2.new(0.221538, 0, 0.448, 0)
+InputBoxX.PlaceholderColor3 = Color3.fromRGB(255, 255, 255)
+InputBoxX.Size = UDim2.new(0, 50, 0, 50)
+InputBoxX.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+InputBoxX.BorderSizePixel = 0
+InputBoxX.TextStrokeTransparency = 0
+InputBoxX.BorderColor3 = Color3.fromRGB(0, 0, 0)
+InputBoxX.Text = ""
+InputBoxX.TextColor3 = Color3.fromRGB(255, 255, 255)
+InputBoxX.TextSize = 24
+InputBoxX.Font = "Cartoon"
+InputBoxX.TextWrapped = true
+InputBoxX.PlaceholderText = "X Value"
+InputBoxX.Parent = Main
+
+InputCorner2.Name = "InputCorner"
+InputCorner2.CornerRadius = UDim.new(0.1, 0)
+InputCorner2.Parent = InputBoxX
+
+InputBoxY.Name = "InputBoxY"
+InputBoxY.Position = UDim2.new(0.421538, 0, 0.448, 0)
+InputBoxY.PlaceholderColor3 = Color3.fromRGB(255, 255, 255)
+InputBoxY.Size = UDim2.new(0, 50, 0, 50)
+InputBoxY.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+InputBoxY.BorderSizePixel = 0
+InputBoxY.TextStrokeTransparency = 0
+InputBoxY.BorderColor3 = Color3.fromRGB(0, 0, 0)
+InputBoxY.Text = ""
+InputBoxY.TextColor3 = Color3.fromRGB(255, 255, 255)
+InputBoxY.TextSize = 24
+InputBoxY.Font = "Cartoon"
+InputBoxY.TextWrapped = true
+InputBoxY.PlaceholderText = "Y Value"
+InputBoxY.Parent = Main
+
+InputCorner3.Name = "InputCorner"
+InputCorner3.CornerRadius = UDim.new(0.1, 0)
+InputCorner3.Parent = InputBoxY
+
+InputBoxZ.Name = "InputBoxZ"
+InputBoxZ.Position = UDim2.new(0.621538, 0, 0.448, 0)
+InputBoxZ.Size = UDim2.new(0, 50, 0, 50)
+InputBoxZ.PlaceholderColor3 = Color3.fromRGB(255, 255, 255)
+InputBoxZ.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+InputBoxZ.BorderSizePixel = 0
+InputBoxZ.TextStrokeTransparency = 0
+InputBoxZ.BorderColor3 = Color3.fromRGB(0, 0, 0)
+InputBoxZ.Text = ""
+InputBoxZ.TextColor3 = Color3.fromRGB(255, 255, 255)
+InputBoxZ.TextSize = 24
+InputBoxZ.Font = "Cartoon"
+InputBoxZ.TextWrapped = true
+InputBoxZ.PlaceholderText = "Z Axis"
+InputBoxZ.Parent = Main
+
+InputCorner4.Name = "InputCorner"
+InputCorner4.CornerRadius = UDim.new(0.1, 0)
+InputCorner4.Parent = InputBoxZ
+
+SubmitGeneration.Name = "SubmitGeneration"
+SubmitGeneration.Position = UDim2.new(0.221538, 0, 0.708, 0)
+SubmitGeneration.Size = UDim2.new(0, 180, 0, 50)
+SubmitGeneration.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+SubmitGeneration.BorderSizePixel = 0
+SubmitGeneration.TextStrokeTransparency = 0
+SubmitGeneration.BorderColor3 = Color3.fromRGB(0, 0, 0)
+SubmitGeneration.Text = "Submit"
+SubmitGeneration.TextColor3 = Color3.fromRGB(255, 255, 255)
+SubmitGeneration.TextSize = 24
+SubmitGeneration.Font = "Cartoon"
+SubmitGeneration.TextWrapped = true
+SubmitGeneration.Parent = Main
+
+InputBoxX.FocusLost:Connect(function(isEnter)
+    if isEnter then
+        if tonumber(InputBoxX.Text) then
+            InputBoxX.Text = tostring(tonumber(InputBoxX.Text))
+        else
+            InputBoxX.Text = ""
+        end
+    end
+end)
+
+InputBoxY.FocusLost:Connect(function(isEnter)
+    if isEnter then
+        if tonumber(InputBoxY.Text) then
+            InputBoxY.Text = tostring(tonumber(InputBoxY.Text))
+        else
+            InputBoxY.Text = ""
+        end
+    end
+end)
+
+InputBoxZ.FocusLost:Connect(function(isEnter)
+    if isEnter then
+        if tonumber(InputBoxZ.Text) then
+            InputBoxZ.Text = tostring(tonumber(InputBoxZ.Text))
+        else
+            InputBoxZ.Text = ""
+        end
+    end
+end)
+
+local function restrictToNumbers(textbox)
+    textbox:GetPropertyChangedSignal("Text"):Connect(function()
+        local cleaned = textbox.Text:gsub("[^%d%.%-]", "")
+        if cleaned ~= textbox.Text then
+            local cursorPos = textbox.CursorPosition
+            textbox.Text = cleaned
+            textbox.CursorPosition = cursorPos - 1
+        end
+    end)
+end
+
+restrictToNumbers(InputBoxX)
+restrictToNumbers(InputBoxY)
+restrictToNumbers(InputBoxZ)
+
+SubmitGeneration.MouseButton1Click:Connect(function()
+    if isGenerating then
+        return
+    end
+    
+    local DotSequence = {"", ".", "..", "...", "...", "..", ".", ""}
+    
+    isGenerating = true
+    SubmitGeneration.Text = "Generating"
+    
+    ToolGenerate:FireServer(tostring(InputBox.Text), Vector3.new(tonumber(InputBoxX.Text), tonumber(InputBoxY.Text), tonumber(InputBoxZ.Text)))
+    
+    task.spawn(function()
+        local index = 1
+        while isGenerating do
+            SubmitGeneration.Text = "Generating" .. DotSequence[index]
+            index = index + 1
+            if index > #DotSequence then
+                index = 1
+            end
+            task.wait(0.15)
+        end
+        
+        if SubmitGeneration.Text ~= "Submit" then
+            SubmitGeneration.Text = "Submit"
+        end
+    end)
+end)
+
+ToolGenerateDone.OnClientEvent:Connect(function()
+    isGenerating = false
+    SubmitGeneration.Text = "Submit"
+end)
+
+Main.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        DragSettings.Toggle = true
+        DragSettings.Start = input.Position
+        DragSettings.InitialPosition = Main.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                DragSettings.Toggle = false
+            end
+        end)
+    end
+end)
+
+InputService.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        if DragSettings.Toggle then
+            UpdateDrag(input, Main)
+        end
+    end
+end)
+
+Player.Chatted:Connect(function(Message)
+    if Message:lower() == "tg" then
+        isUIVisible = not isUIVisible
+        
+        local targetTransparency = isUIVisible and 0 or 1
+        local targetStrokeTransparency = isUIVisible and 0 or 1
+        
+        if isUIVisible then
+            CustomToolSpoofer.Enabled = true
+            
+            TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {BackgroundTransparency = 0.5}):Play()
+            
+            TweenService:Create(MainStroke, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Transparency = 0}):Play()
+            
+            local textElements = {Title, InputBox, InputBoxX, InputBoxY, InputBoxZ, SubmitGeneration}
+
+            for _, elem in ipairs(textElements) do
+                TweenService:Create(elem, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {BackgroundTransparency = elem:IsA("TextButton") or elem:IsA("TextBox") and 0 or 1, TextTransparency = 0, TextStrokeTransparency = 0}):Play()
+            end
+        else
+            TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {BackgroundTransparency = 1}):Play()
+            
+            TweenService:Create(MainStroke, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Transparency = 1}):Play()
+            
+            local textElements = {Title, InputBox, InputBoxX, InputBoxY, InputBoxZ, SubmitGeneration}
+            
+            for _, elem in ipairs(textElements) do
+                TweenService:Create(elem, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {BackgroundTransparency = 1, TextTransparency = 1, TextStrokeTransparency = 1}):Play()
+            end
+            
+            task.delay(TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut).Time, function()
+                if not isUIVisible then
+                    CustomToolSpoofer.Enabled = false
+                end
+            end)
+        end
+    end
+end)
+
+while task.wait() do
+    MainGradient.Rotation = MainGradient.Rotation + 1
+
+    if MainGradient.Rotation > 360 then
+        MainGradient.Rotation = 0
+    elseif MainGradient.Rotation < 0 then
+        MainGradient.Rotation = 0
+    end
+end
